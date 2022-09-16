@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-
+	jarDemo()
 }
 
 func jarDemo() {
