@@ -1,0 +1,76 @@
+
+主机名:           GEFM
+OS 名称:          Microsoft Windows 11 专业版
+OS 版本:          10.0.22000 暂缺 Build 22000
+OS 制造商:        Microsoft Corporation
+OS 配置:          独立工作站
+OS 构建类型:      Multiprocessor Free
+注册的所有人:     Microsoft
+注册的组织:       Microsoft
+产品 ID:          00331-10000-00001-AA544
+初始安装日期:     2021/8/31, 19:15:38
+系统启动时间:     2022/9/13, 9:40:04
+系统制造商:       System manufacturer
+系统型号:         System Product Name
+系统类型:         x64-based PC
+处理器:           安装了 1 个处理器。
+                  [01]: Intel64 Family 6 Model 158 Stepping 9 GenuineIntel ~3401 Mhz
+BIOS 版本:        American Megatrends Inc. 1603, 2019/3/1
+Windows 目录:     C:\windows
+系统目录:         C:\windows\system32
+启动设备:         \Device\HarddiskVolume1
+系统区域设置:     zh-cn;中文(中国)
+输入法区域设置:   zh-cn;中文(中国)
+时区:             (UTC+08:00) 北京，重庆，香港特别行政区，乌鲁木齐
+物理内存总量:     32,646 MB
+可用的物理内存:   10,720 MB
+虚拟内存: 最大值: 69,510 MB
+虚拟内存: 可用:   13,948 MB
+虚拟内存: 使用中: 55,562 MB
+页面文件位置:     E:\pagefile.sys
+域:               WorkGroup
+登录服务器:       \\GEFM
+修补程序:         安装了 6 个修补程序。
+                  [01]: KB5015732
+                  [02]: KB5004567
+                  [03]: KB5008295
+                  [04]: KB5012170
+                  [05]: KB5016629
+                  [06]: KB5015898
+网卡:             安装了 5 个 NIC。
+                  [01]: Intel(R) Ethernet Connection (2) I219-V
+                      连接名:      以太网
+                      启用 DHCP:   否
+                      IP 地址
+                        [01]: 192.168.3.104
+                        [02]: fe80::4f6:37c8:7d24:7443
+                  [02]: VMware Virtual Ethernet Adapter for VMnet1
+                      连接名:      VMware Network Adapter VMnet1
+                      启用 DHCP:   是
+                      DHCP 服务器: 192.168.64.254
+                      IP 地址
+                        [01]: 192.168.64.1
+                        [02]: fe80::6dac:bcfa:4836:1446
+                  [03]: VMware Virtual Ethernet Adapter for VMnet8
+                      连接名:      VMware Network Adapter VMnet8
+                      启用 DHCP:   是
+                      DHCP 服务器: 192.168.238.254
+                      IP 地址
+                        [01]: 192.168.238.1
+                        [02]: fe80::48ba:3e1:5e1b:1f24
+                  [04]: TAP-Windows Adapter V9
+                      连接名:      LetsTAP
+                      启用 DHCP:   否
+                      IP 地址
+                        [01]: 26.26.26.1
+                        [02]: fe80::c04e:e200:7562:4bd1
+                  [05]: ZeroTier Virtual Port
+                      连接名:      ZeroTier One [b15644912e1993fc]
+                      启用 DHCP:   否
+                      IP 地址
+                        [01]: 192.168.192.223
+                        [02]: fe80::c8f3:5726:7d34:882a
+Hyper-V 要求:     虚拟机监视器模式扩展: 是
+                  固件中已启用虚拟化: 是
+                  二级地址转换: 是
+                  数据执行保护可用: 是
