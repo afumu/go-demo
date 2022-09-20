@@ -1,15 +1,22 @@
 package main
 
-import "test-demo/demo/osinfo"
+import "fmt"
 
-func Add(x, y int) int {
-	return x + y
+type User struct {
+	Name string
 }
 
-func Subtract(x, y int) int {
-	return x - y
+func setUser(list []*User) {
+	for _, v := range list {
+		v.Name = "lisi"
+	}
 }
 
 func main() {
-	osinfo.GetHostInfo()
+	var list []*User
+	list = append(list, &User{Name: "zhangsan"})
+	setUser(list)
+	for _, v := range list {
+		fmt.Println(v)
+	}
 }
