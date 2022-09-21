@@ -633,3 +633,66 @@ func TestWait(t *testing.T) {
 	fmt.Println(result)
 	time.Sleep(10 * time.Second)
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+// channel 一对一通信
+func TestOneTwoOne(t *testing.T) {
+	var ch = make(chan int)
+	go func() {
+		time.Sleep(3 * time.Second)
+		fmt.Println("111")
+		ch <- 1
+	}()
+	<-ch
+	fmt.Println("over")
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 一对多通信
+func TestOneToMany1(t *testing.T) {
+
+	var wg sync.WaitGroup
+	var ch = make(chan int)
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func(j int) {
+			time.Sleep(1 * time.Second)
+			fmt.Println("sun func", j)
+			wg.Done()
+		}(i)
+	}
+
+	go func() {
+		wg.Wait()
+		ch <- 1
+	}()
+
+	<-ch
+	fmt.Println("over")
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 广播机制,通过关闭channel来实现通知所有的等待协程
+func TestOneToWaitMany(t *testing.T) {
+	var ch = make(chan int)
+	for i := 0; i < 10; i++ {
+		go func(j int) {
+		loop:
+			for {
+				select {
+				default:
+					fmt.Println(j, ":睡眠1s")
+					time.Sleep(1 * time.Second)
+				case <-ch:
+					fmt.Println(j, ":quit")
+					break loop
+				}
+			}
+		}(i)
+	}
+
+	time.Sleep(3 * time.Second)
+	close(ch)
+	fmt.Println("over")
+	time.Sleep(3 * time.Second)
+}
