@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"runtime"
+)
 
 type User struct {
 	Name string
@@ -13,10 +16,16 @@ func setUser(list []*User) {
 }
 
 func main() {
-	var list []*User
-	list = append(list, &User{Name: "zhangsan"})
-	setUser(list)
-	for _, v := range list {
-		fmt.Println(v)
+	//runtime.GOARCH 返回当前的系统架构；runtime.GOOS 返回当前的操作系统。
+	sysType := runtime.GOOS
+
+	if sysType == "linux" {
+		// LINUX系统
+		fmt.Println("Linux system")
+	}
+
+	if sysType == "windows" {
+		// windows系统
+		fmt.Println("Windows system")
 	}
 }

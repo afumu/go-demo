@@ -52,23 +52,43 @@ func connect() factory.Factory {
 		}))
 }
 
+// 先创建桶
+func TestCreate(t *testing.T) {
+	// Start a writable transaction.
+	tx, err := globalDb.Begin(true)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer tx.Rollback()
+
+	// Use the transaction...
+	_, err = tx.CreateBucket([]byte("winVuln"))
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// Commit the transaction and check for error.
+	if err := tx.Commit(); err != nil {
+		fmt.Println(err)
+	}
+}
+
 var wg sync.WaitGroup
 
-func Test_connect(t *testing.T) {
+// 查询数据,添加数据到bolt数据库
+func TestPutData(t *testing.T) {
 	mgr := gobatis.NewSessionManager(connect())
 	userMapper := mapper.BaseMapper[WinVuln]{SessMgr: mgr}
 	queryWrapper := &mapper.QueryWrapper[WinVuln]{}
 	list, err := userMapper.SelectList(queryWrapper)
-
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-
 	var end = 0
-	var count = 500
+	var count = 300
 	// 30万
-	// 300 个协程，每个 1000
-	// map[AffectedProduct,map[AffectedComponent][value]]
+	// 300 个协程，每个协程写入1000条数据
+	// map[AffectedProduct,map[id][jsonvalue]]
 	// 0-300
 	// 300-600
 	for i := 0; i < len(list); i++ {
@@ -79,18 +99,23 @@ func Test_connect(t *testing.T) {
 			go putData(i, end, list)
 		}
 	}
+
+	// 等待所有协程完成工作
 	wg.Wait()
 	fmt.Println("全部完成")
 }
 
 func putData(start int, end int, list []WinVuln) {
 	//fmt.Printf("%d-%d:开始填充数据\n", start, end)
-	newList := list[start:end]
+
+	// 手动开启事务
 	tx, err := globalDb.Begin(true)
 	if err != nil {
 		log.Fatal(err)
 	}
+	// 前提是允许 TestCreate 创建了桶
 	winVulnBucket := tx.Bucket([]byte("winVuln"))
+	newList := list[start:end]
 	for _, v := range newList {
 		//fmt.Printf("%d-%d:处理到了第%d条数据\n", start, end, i)
 		marshal, _ := json.Marshal(v)
@@ -104,12 +129,12 @@ func putData(start int, end int, list []WinVuln) {
 		if product != nil {
 			err = product.Put([]byte(v.Id), marshal)
 		}
-
 	}
 
+	// 关闭事务
 	err = tx.Commit()
 	if err != nil {
-		fmt.Printf("%d-%d:填充数据失败", start, end)
+		fmt.Printf("%d-%d:填充数据失败\n", start, end)
 	}
 
 	//fmt.Printf("%d-%d:填充数据完毕\n", start, end)
@@ -173,30 +198,5 @@ func TestSearch(t *testing.T) {
 		}
 		return nil
 	})
-
 	fmt.Println(err)
-}
-
-func TestCreate(t *testing.T) {
-	create()
-}
-
-func create() {
-	// Start a writable transaction.
-	tx, err := globalDb.Begin(true)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer tx.Rollback()
-
-	// Use the transaction...
-	_, err = tx.CreateBucket([]byte("winVuln"))
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	// Commit the transaction and check for error.
-	if err := tx.Commit(); err != nil {
-		fmt.Println(err)
-	}
 }

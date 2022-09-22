@@ -125,7 +125,6 @@ func determineMissingPatches(product string, list []*WinVuln, kbResults []string
 	}
 
 	// 合并补丁包
-
 	join := strings.Join(kbResults, ";")
 	markSuperseededHotfix(filtered, join)
 
@@ -376,8 +375,6 @@ func getSystemInfo() string {
 		return ""
 	}
 	systemInfo := builder.String()
-
-	//fmt.Println(systemInfo)
 	return systemInfo
 }
 
