@@ -773,5 +773,57 @@ func TestSignal(t *testing.T) {
 	}
 	wg.Wait()
 	fmt.Println("over")
+}
 
+// ---------------------------------------------------------------------------------------------------------------------
+// 尝试通过select来判断有缓存是否有数据
+
+func trySend(ch chan int, i int) bool {
+	select {
+	case ch <- i:
+		return true
+	default:
+		return false
+	}
+}
+
+func tryRec(ch chan int) (int, bool) {
+	select {
+	case i := <-ch:
+		return i, true
+	default:
+		return 0, false
+	}
+}
+
+func producer(ch chan int) {
+	var count = 0
+	for {
+		send := trySend(ch, count)
+		if send {
+			count++
+			fmt.Println("发送成功")
+		} else {
+			time.Sleep(1 * time.Second)
+		}
+	}
+}
+
+func consumer(ch chan int) {
+	for {
+		rec, ok := tryRec(ch)
+		if ok {
+			fmt.Println("获取成功：", rec)
+		} else {
+			time.Sleep(1 * time.Second)
+		}
+	}
+
+}
+
+func TestIfHasData(t *testing.T) {
+	var ch = make(chan int, 3)
+	go producer(ch)
+	go consumer(ch)
+	select {}
 }
