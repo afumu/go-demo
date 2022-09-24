@@ -661,12 +661,10 @@ func TestOneToMany1(t *testing.T) {
 			wg.Done()
 		}(i)
 	}
-
 	go func() {
 		wg.Wait()
 		ch <- 1
 	}()
-
 	<-ch
 	fmt.Println("over")
 }
@@ -695,4 +693,57 @@ func TestOneToWaitMany(t *testing.T) {
 	close(ch)
 	fmt.Println("over")
 	time.Sleep(3 * time.Second)
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 通过锁的方式来实现数字的累加
+var counter Counter
+
+type Counter struct {
+	mu    sync.Mutex
+	count int
+}
+
+func add() {
+	counter.mu.Lock()
+	defer counter.mu.Unlock()
+	counter.count++
+}
+func TestCounter1(t *testing.T) {
+	for i := 0; i < 1000; i++ {
+		go func() {
+			add()
+		}()
+	}
+	time.Sleep(2 * time.Second)
+	fmt.Println(counter.count)
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 通过channel的方式来实现累加
+// 通过一个协程中启动一个协程来不断的循环累增加数字来实现累加
+var counter2 = Counter2{ch: make(chan int)}
+
+type Counter2 struct {
+	ch    chan int
+	count int
+}
+
+func add2() int {
+	return <-counter2.ch
+}
+func TestCounter2(t *testing.T) {
+	go func() {
+		for true {
+			counter2.ch <- counter2.count
+			counter2.count++
+		}
+	}()
+	for i := 0; i < 1000; i++ {
+		go func() {
+			add2()
+		}()
+	}
+	time.Sleep(2 * time.Second)
+	fmt.Println(counter2.count)
 }
