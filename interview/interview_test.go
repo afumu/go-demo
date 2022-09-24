@@ -851,3 +851,33 @@ func TestCompare(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
+// 测试sync和channel作为同步的性能
+var cs = 0 // 模拟临界区要保护的数据
+var mu sync.Mutex
+var c = make(chan struct{}, 1)
+
+// 方式1
+func criticalSectionSyncByMutex() {
+	mu.Lock()
+	cs++
+	mu.Unlock()
+}
+
+// 方式2
+func criticalSectionSyncByChan() {
+	c <- struct{}{}
+	cs++
+	<-c
+}
+
+func BenchmarkCriticalSectionSyncByMutex(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		criticalSectionSyncByMutex()
+	}
+}
+
+func BenchmarkCriticalSectionSyncByChan(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		criticalSectionSyncByChan()
+	}
+}
