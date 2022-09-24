@@ -827,3 +827,27 @@ func TestIfHasData(t *testing.T) {
 	go consumer(ch)
 	select {}
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 测试无缓存chan和有缓存channel长度为1的区别
+func TestCompare(t *testing.T) {
+	/*	var ch = make(chan int)
+		go func(ch chan int) {
+			ch <- 1
+			// 永远不会执行
+			fmt.Println("11111111111")
+		}(ch)
+		time.Sleep(5 * time.Second)
+		fmt.Println("over")*/
+
+	var ch = make(chan int, 1)
+	go func(ch chan int) {
+		ch <- 1
+		// 执行成功
+		fmt.Println("11111111111")
+	}(ch)
+	time.Sleep(5 * time.Second)
+	fmt.Println("over")
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
