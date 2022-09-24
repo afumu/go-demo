@@ -747,3 +747,31 @@ func TestCounter2(t *testing.T) {
 	time.Sleep(2 * time.Second)
 	fmt.Println(counter2.count)
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 通过有缓存通道进行信号量
+// 工作量为10
+var jobs = make(chan int, 10)
+
+// 每次只能有3个协程工作
+var signal = make(chan struct{}, 3)
+
+func TestSignal(t *testing.T) {
+	for i := 0; i < 10; i++ {
+		jobs <- i + 1
+	}
+	var wg sync.WaitGroup
+	for job := range jobs {
+		wg.Add(1)
+		signal <- struct{}{}
+		go func(j int) {
+			defer wg.Done()
+			fmt.Println("job", j)
+			time.Sleep(1 * time.Second)
+			<-signal
+		}(job)
+	}
+	wg.Wait()
+	fmt.Println("over")
+
+}
