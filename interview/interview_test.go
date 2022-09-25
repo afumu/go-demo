@@ -881,3 +881,82 @@ func BenchmarkCriticalSectionSyncByChan(b *testing.B) {
 		criticalSectionSyncByChan()
 	}
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 测试sync.Mutex
+type foo struct {
+	n int
+	sync.Mutex
+}
+
+func TestCopyMutex(t *testing.T) {
+	f := foo{n: 17}
+
+	go func(f foo) {
+		for {
+			log.Println("g2: try to lock foo...")
+			f.Lock()
+			log.Println("g2: lock foo ok")
+			time.Sleep(3 * time.Second)
+			f.Unlock()
+			log.Println("g2: unlock foo ok")
+		}
+	}(f)
+
+	f.Lock()
+	log.Println("g1: lock foo ok")
+
+	// 在Mutex首次使用后复制其值
+	// 这里的复制，其实相当于把上面的锁也给复制过来了，导致内部协程一直被阻塞
+	go func(f foo) {
+		for {
+			log.Println("g3: try to lock foo...")
+			f.Lock()
+			log.Println("g3: lock foo ok")
+			time.Sleep(5 * time.Second)
+			f.Unlock()
+			log.Println("g3: unlock foo ok")
+		}
+	}(f)
+
+	time.Sleep(1000 * time.Second)
+	f.Unlock()
+	log.Println("g1: unlock foo ok")
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 测试都互斥锁和读写锁的性能
+var cs1 = 0 // 模拟临界区要保护的数据
+var mu1 sync.Mutex
+var cs2 = 0 // 模拟临界区要保护的数据
+var mu2 sync.RWMutex
+
+func BenchmarkReadSyncByMutex(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			mu1.Lock()
+			_ = cs1
+			mu1.Unlock()
+		}
+	})
+}
+
+func BenchmarkReadSyncByRWMutex(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			mu2.RLock()
+			_ = cs2
+			mu2.RUnlock()
+		}
+	})
+}
+
+func BenchmarkWriteSyncByRWMutex(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			mu2.Lock()
+			cs2++
+			mu2.Unlock()
+		}
+	})
+}
