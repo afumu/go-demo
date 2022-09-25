@@ -960,3 +960,128 @@ func BenchmarkWriteSyncByRWMutex(b *testing.B) {
 		}
 	})
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 测试轮询等待
+// chapter6/sources/go-sync-package-4.go
+
+var ready bool
+
+func worker(i int) {
+	fmt.Printf("worker %d: is working...\n", i)
+	time.Sleep(1 * time.Second)
+	fmt.Printf("worker %d: works done\n", i)
+}
+func spawnPollGroup(f func(i int), num int, mu *sync.Mutex) <-chan struct{} {
+	c := make(chan struct{})
+	var wg sync.WaitGroup
+
+	for i := 0; i < num; i++ {
+		wg.Add(1)
+		go func(i int) {
+			// 这种轮询判断条件相对来说是比较消耗资源的
+			for {
+				mu.Lock()
+				if !ready {
+					mu.Unlock()
+					time.Sleep(100 * time.Millisecond)
+					continue
+				}
+				mu.Unlock()
+				fmt.Printf("worker %d: start to work...\n", i)
+				f(i)
+				wg.Done()
+				return
+			}
+		}(i + 1)
+	}
+
+	go func() {
+		wg.Wait()
+		c <- struct{}{}
+	}()
+	return c
+}
+
+func TestPollWait(t *testing.T) {
+	fmt.Println("start a group of workers...")
+	mu := &sync.Mutex{}
+	c := spawnPollGroup(worker, 5, mu)
+
+	time.Sleep(5 * time.Second) // 模拟ready前的准备工作
+	fmt.Println("the group of workers start to work...")
+
+	mu.Lock()
+	ready = true
+	mu.Unlock()
+
+	<-c
+	fmt.Println("the group of workers work done!")
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 通过sync.cond 来实现条件变量，避免轮询
+func spawnCondGroup(f func(i int), num int, groupSignal *sync.Cond) <-chan struct{} {
+	c := make(chan struct{})
+	var wg sync.WaitGroup
+
+	for i := 0; i < num; i++ {
+		wg.Add(1)
+		go func(i int) {
+			groupSignal.L.Lock()
+			for !ready {
+				groupSignal.Wait()
+			}
+			groupSignal.L.Unlock()
+			fmt.Printf("worker %d: start to work...\n", i)
+			f(i)
+			wg.Done()
+		}(i + 1)
+	}
+
+	go func() {
+		wg.Wait()
+		c <- struct{}{}
+	}()
+	return c
+}
+
+func isNotReady() bool {
+	fmt.Println("isNotReady Execute", !ready)
+	return !ready
+}
+
+func TestCondWait(t *testing.T) {
+	fmt.Println("start a group of workers...")
+	groupSignal := sync.NewCond(&sync.Mutex{})
+	c := spawnCondGroup(worker, 1, groupSignal)
+
+	time.Sleep(5 * time.Second) // 模拟ready前的准备工作
+	fmt.Println("the group of workers start to work...")
+
+	groupSignal.L.Lock()
+	ready = true
+	groupSignal.Broadcast()
+
+	groupSignal.L.Unlock()
+
+	<-c
+	fmt.Println("the group of workers work done!")
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 测试sync.Once
+
+var once sync.Once
+
+func execute() {
+	once.Do(func() {
+		fmt.Println("aa")
+	})
+}
+
+func TestDoOne(t *testing.T) {
+	for i := 0; i < 10; i++ {
+		execute()
+	}
+}
