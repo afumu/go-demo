@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -1084,4 +1086,100 @@ func TestDoOne(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		execute()
 	}
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 测试sync.pool 和 普通创建对象的性能
+var bufPool = sync.Pool{
+	New: func() interface{} {
+		return new(bytes.Buffer)
+	},
+}
+
+func writeBufFromPool(data string) {
+	b := bufPool.Get().(*bytes.Buffer)
+	b.Reset()
+	b.WriteString(data)
+	bufPool.Put(b)
+}
+
+func writeBufFromNew(data string) *bytes.Buffer {
+	b := new(bytes.Buffer)
+	b.WriteString(data)
+	return b
+}
+
+func BenchmarkWithoutPool(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		writeBufFromNew("hello")
+	}
+}
+
+func BenchmarkWithPool(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		writeBufFromPool("hello")
+	}
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 测试atomic和sync的性能
+var n1 int64
+
+func addSyncByAtomic(delta int64) int64 {
+	return atomic.AddInt64(&n1, delta)
+}
+
+func readSyncByAtomic() int64 {
+	return atomic.LoadInt64(&n1)
+}
+
+var n2 int64
+var rwmu sync.RWMutex
+
+func addSyncByRWMutex(delta int64) {
+	rwmu.Lock()
+	n2 += delta
+	rwmu.Unlock()
+}
+
+func readSyncByRWMutex() int64 {
+	var n int64
+	rwmu.RLock()
+	n = n2
+	rwmu.RUnlock()
+	return n
+}
+
+func BenchmarkAddSyncByAtomic(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			addSyncByAtomic(1)
+		}
+	})
+}
+
+func BenchmarkReadSyncByAtomic(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			readSyncByAtomic()
+		}
+	})
+}
+
+func BenchmarkAddSyncByRWMutex(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			addSyncByRWMutex(1)
+		}
+	})
+}
+
+func BenchmarkReadSyncByRWMutex2(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			readSyncByRWMutex()
+		}
+	})
 }
