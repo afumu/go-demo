@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -661,12 +663,10 @@ func TestOneToMany1(t *testing.T) {
 			wg.Done()
 		}(i)
 	}
-
 	go func() {
 		wg.Wait()
 		ch <- 1
 	}()
-
 	<-ch
 	fmt.Println("over")
 }
@@ -695,4 +695,491 @@ func TestOneToWaitMany(t *testing.T) {
 	close(ch)
 	fmt.Println("over")
 	time.Sleep(3 * time.Second)
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 通过锁的方式来实现数字的累加
+var counter Counter
+
+type Counter struct {
+	mu    sync.Mutex
+	count int
+}
+
+func add() {
+	counter.mu.Lock()
+	defer counter.mu.Unlock()
+	counter.count++
+}
+func TestCounter1(t *testing.T) {
+	for i := 0; i < 1000; i++ {
+		go func() {
+			add()
+		}()
+	}
+	time.Sleep(2 * time.Second)
+	fmt.Println(counter.count)
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 通过channel的方式来实现累加
+// 通过一个协程中启动一个协程来不断的循环累增加数字来实现累加
+var counter2 = Counter2{ch: make(chan int)}
+
+type Counter2 struct {
+	ch    chan int
+	count int
+}
+
+func add2() int {
+	return <-counter2.ch
+}
+func TestCounter2(t *testing.T) {
+	go func() {
+		for true {
+			counter2.ch <- counter2.count
+			counter2.count++
+		}
+	}()
+	for i := 0; i < 1000; i++ {
+		go func() {
+			add2()
+		}()
+	}
+	time.Sleep(2 * time.Second)
+	fmt.Println(counter2.count)
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 通过有缓存通道进行信号量
+// 工作量为10
+var jobs = make(chan int, 10)
+
+// 每次只能有3个协程工作
+var signal = make(chan struct{}, 3)
+
+func TestSignal(t *testing.T) {
+	for i := 0; i < 10; i++ {
+		jobs <- i + 1
+	}
+	var wg sync.WaitGroup
+	for job := range jobs {
+		wg.Add(1)
+		signal <- struct{}{}
+		go func(j int) {
+			defer wg.Done()
+			fmt.Println("job", j)
+			time.Sleep(1 * time.Second)
+			<-signal
+		}(job)
+	}
+	wg.Wait()
+	fmt.Println("over")
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 尝试通过select来判断有缓存是否有数据
+
+func trySend(ch chan int, i int) bool {
+	select {
+	case ch <- i:
+		return true
+	default:
+		return false
+	}
+}
+
+func tryRec(ch chan int) (int, bool) {
+	select {
+	case i := <-ch:
+		return i, true
+	default:
+		return 0, false
+	}
+}
+
+func producer(ch chan int) {
+	var count = 0
+	for {
+		send := trySend(ch, count)
+		if send {
+			count++
+			fmt.Println("发送成功")
+		} else {
+			time.Sleep(1 * time.Second)
+		}
+	}
+}
+
+func consumer(ch chan int) {
+	for {
+		rec, ok := tryRec(ch)
+		if ok {
+			fmt.Println("获取成功：", rec)
+		} else {
+			time.Sleep(1 * time.Second)
+		}
+	}
+
+}
+
+func TestIfHasData(t *testing.T) {
+	var ch = make(chan int, 3)
+	go producer(ch)
+	go consumer(ch)
+	select {}
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 测试无缓存chan和有缓存channel长度为1的区别
+func TestCompare(t *testing.T) {
+	/*	var ch = make(chan int)
+		go func(ch chan int) {
+			ch <- 1
+			// 永远不会执行
+			fmt.Println("11111111111")
+		}(ch)
+		time.Sleep(5 * time.Second)
+		fmt.Println("over")*/
+
+	var ch = make(chan int, 1)
+	go func(ch chan int) {
+		ch <- 1
+		// 执行成功
+		fmt.Println("11111111111")
+	}(ch)
+	time.Sleep(5 * time.Second)
+	fmt.Println("over")
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 测试sync和channel作为同步的性能
+var cs = 0 // 模拟临界区要保护的数据
+var mu sync.Mutex
+var c = make(chan struct{}, 1)
+
+// 方式1
+func criticalSectionSyncByMutex() {
+	mu.Lock()
+	cs++
+	mu.Unlock()
+}
+
+// 方式2
+func criticalSectionSyncByChan() {
+	c <- struct{}{}
+	cs++
+	<-c
+}
+
+func BenchmarkCriticalSectionSyncByMutex(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		criticalSectionSyncByMutex()
+	}
+}
+
+func BenchmarkCriticalSectionSyncByChan(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		criticalSectionSyncByChan()
+	}
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 测试sync.Mutex
+type foo struct {
+	n int
+	sync.Mutex
+}
+
+func TestCopyMutex(t *testing.T) {
+	f := foo{n: 17}
+
+	go func(f foo) {
+		for {
+			log.Println("g2: try to lock foo...")
+			f.Lock()
+			log.Println("g2: lock foo ok")
+			time.Sleep(3 * time.Second)
+			f.Unlock()
+			log.Println("g2: unlock foo ok")
+		}
+	}(f)
+
+	f.Lock()
+	log.Println("g1: lock foo ok")
+
+	// 在Mutex首次使用后复制其值
+	// 这里的复制，其实相当于把上面的锁也给复制过来了，导致内部协程一直被阻塞
+	go func(f foo) {
+		for {
+			log.Println("g3: try to lock foo...")
+			f.Lock()
+			log.Println("g3: lock foo ok")
+			time.Sleep(5 * time.Second)
+			f.Unlock()
+			log.Println("g3: unlock foo ok")
+		}
+	}(f)
+
+	time.Sleep(1000 * time.Second)
+	f.Unlock()
+	log.Println("g1: unlock foo ok")
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 测试都互斥锁和读写锁的性能
+var cs1 = 0 // 模拟临界区要保护的数据
+var mu1 sync.Mutex
+var cs2 = 0 // 模拟临界区要保护的数据
+var mu2 sync.RWMutex
+
+func BenchmarkReadSyncByMutex(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			mu1.Lock()
+			_ = cs1
+			mu1.Unlock()
+		}
+	})
+}
+
+func BenchmarkReadSyncByRWMutex(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			mu2.RLock()
+			_ = cs2
+			mu2.RUnlock()
+		}
+	})
+}
+
+func BenchmarkWriteSyncByRWMutex(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			mu2.Lock()
+			cs2++
+			mu2.Unlock()
+		}
+	})
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 测试轮询等待
+// chapter6/sources/go-sync-package-4.go
+
+var ready bool
+
+func worker(i int) {
+	fmt.Printf("worker %d: is working...\n", i)
+	time.Sleep(1 * time.Second)
+	fmt.Printf("worker %d: works done\n", i)
+}
+func spawnPollGroup(f func(i int), num int, mu *sync.Mutex) <-chan struct{} {
+	c := make(chan struct{})
+	var wg sync.WaitGroup
+
+	for i := 0; i < num; i++ {
+		wg.Add(1)
+		go func(i int) {
+			// 这种轮询判断条件相对来说是比较消耗资源的
+			for {
+				mu.Lock()
+				if !ready {
+					mu.Unlock()
+					time.Sleep(100 * time.Millisecond)
+					continue
+				}
+				mu.Unlock()
+				fmt.Printf("worker %d: start to work...\n", i)
+				f(i)
+				wg.Done()
+				return
+			}
+		}(i + 1)
+	}
+
+	go func() {
+		wg.Wait()
+		c <- struct{}{}
+	}()
+	return c
+}
+
+func TestPollWait(t *testing.T) {
+	fmt.Println("start a group of workers...")
+	mu := &sync.Mutex{}
+	c := spawnPollGroup(worker, 5, mu)
+
+	time.Sleep(5 * time.Second) // 模拟ready前的准备工作
+	fmt.Println("the group of workers start to work...")
+
+	mu.Lock()
+	ready = true
+	mu.Unlock()
+
+	<-c
+	fmt.Println("the group of workers work done!")
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 通过sync.cond 来实现条件变量，避免轮询
+func spawnCondGroup(f func(i int), num int, groupSignal *sync.Cond) <-chan struct{} {
+	c := make(chan struct{})
+	var wg sync.WaitGroup
+
+	for i := 0; i < num; i++ {
+		wg.Add(1)
+		go func(i int) {
+			groupSignal.L.Lock()
+			for !ready {
+				groupSignal.Wait()
+			}
+			groupSignal.L.Unlock()
+			fmt.Printf("worker %d: start to work...\n", i)
+			f(i)
+			wg.Done()
+		}(i + 1)
+	}
+
+	go func() {
+		wg.Wait()
+		c <- struct{}{}
+	}()
+	return c
+}
+
+func isNotReady() bool {
+	fmt.Println("isNotReady Execute", !ready)
+	return !ready
+}
+
+func TestCondWait(t *testing.T) {
+	fmt.Println("start a group of workers...")
+	groupSignal := sync.NewCond(&sync.Mutex{})
+	c := spawnCondGroup(worker, 1, groupSignal)
+
+	time.Sleep(5 * time.Second) // 模拟ready前的准备工作
+	fmt.Println("the group of workers start to work...")
+
+	groupSignal.L.Lock()
+	ready = true
+	groupSignal.Broadcast()
+
+	groupSignal.L.Unlock()
+
+	<-c
+	fmt.Println("the group of workers work done!")
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 测试sync.Once
+
+var once sync.Once
+
+func execute() {
+	once.Do(func() {
+		fmt.Println("aa")
+	})
+}
+
+func TestDoOne(t *testing.T) {
+	for i := 0; i < 10; i++ {
+		execute()
+	}
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 测试sync.pool 和 普通创建对象的性能
+var bufPool = sync.Pool{
+	New: func() interface{} {
+		return new(bytes.Buffer)
+	},
+}
+
+func writeBufFromPool(data string) {
+	b := bufPool.Get().(*bytes.Buffer)
+	b.Reset()
+	b.WriteString(data)
+	bufPool.Put(b)
+}
+
+func writeBufFromNew(data string) *bytes.Buffer {
+	b := new(bytes.Buffer)
+	b.WriteString(data)
+	return b
+}
+
+func BenchmarkWithoutPool(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		writeBufFromNew("hello")
+	}
+}
+
+func BenchmarkWithPool(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		writeBufFromPool("hello")
+	}
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 测试atomic和sync的性能
+var n1 int64
+
+func addSyncByAtomic(delta int64) int64 {
+	return atomic.AddInt64(&n1, delta)
+}
+
+func readSyncByAtomic() int64 {
+	return atomic.LoadInt64(&n1)
+}
+
+var n2 int64
+var rwmu sync.RWMutex
+
+func addSyncByRWMutex(delta int64) {
+	rwmu.Lock()
+	n2 += delta
+	rwmu.Unlock()
+}
+
+func readSyncByRWMutex() int64 {
+	var n int64
+	rwmu.RLock()
+	n = n2
+	rwmu.RUnlock()
+	return n
+}
+
+func BenchmarkAddSyncByAtomic(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			addSyncByAtomic(1)
+		}
+	})
+}
+
+func BenchmarkReadSyncByAtomic(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			readSyncByAtomic()
+		}
+	})
+}
+
+func BenchmarkAddSyncByRWMutex(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			addSyncByRWMutex(1)
+		}
+	})
+}
+
+func BenchmarkReadSyncByRWMutex2(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			readSyncByRWMutex()
+		}
+	})
 }
