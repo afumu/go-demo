@@ -179,3 +179,7 @@ func TestBucketS(t *testing.T) {
 	})
 
 }
+
+func TestCreateDefault(t *testing.T) {
+
+}

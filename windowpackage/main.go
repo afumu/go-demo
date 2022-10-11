@@ -3,72 +3,78 @@ package main
 import (
 	"fmt"
 	"golang.org/x/sys/windows/registry"
-	"strconv"
+	"log"
 	"sync"
 )
 
-type SoftwareDetails struct {
-	DisplayIcon     string
-	DisplayName     string
-	DisplayVersion  string
-	InstallLocation string
-	Publisher       string
-	UninstallString string
+type Software struct {
+	DisplayIcon      string
+	Name             string
+	Version          string
+	InstallLocation  string
+	Publisher        string
+	UninstallString  string
+	InstallationTime string
 }
+
+var query64Path = "Software\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall"
+var queryPath = "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall"
 
 func main() {
-	exe := QueryWindowsExe()
-	fmt.Println(exe)
+	allSoftware := QueryWindowsSoftware()
+	fmt.Println(allSoftware)
 }
 
-func QueryWindowsExe() []SoftwareDetails {
-	softwareDetailsSli := []SoftwareDetails{}
-
-	queryKey := func(w *sync.WaitGroup, startKey registry.Key, res *[]SoftwareDetails) {
+func QueryWindowsSoftware() []Software {
+	var softwareDetailsSli []Software
+	queryKey := func(w *sync.WaitGroup, res *[]Software) {
 		defer w.Done()
-		var queryPath string
-		var query64Path string
-		if strconv.IntSize == 64 {
-			query64Path = "Software\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall"
-			queryPath = "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall"
-			kQuery64, err := registry.OpenKey(startKey, query64Path, registry.READ)
-			if err != nil {
-				return
-			}
-			keyNames, err := kQuery64.ReadSubKeyNames(0)
-			if err != nil {
-				return
-			}
-			//查询出query64Path下面的程序详情，并且添加到SoftwareDetails
-			softwareDetailsSli = getSoftwareDetails(startKey, keyNames, query64Path)
-			*res = append(*res, softwareDetailsSli...)
-		} else {
-			queryPath = "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall"
+
+		// 打开注册表文件
+		kQuery64, err := registry.OpenKey(registry.LOCAL_MACHINE, query64Path, registry.READ)
+		if err != nil {
+			log.Println(err)
+			return
 		}
-		k, err1 := registry.OpenKey(startKey, queryPath, registry.READ)
+
+		// 读取注册表所有的key
+		keyNames, err := kQuery64.ReadSubKeyNames(0)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		// 查询出query64Path下面的程序详情，并且添加到SoftwareDetails
+		softwareDetailsSli = getSoftwareDetails(keyNames, query64Path)
+		*res = append(*res, softwareDetailsSli...)
+
+		k, err1 := registry.OpenKey(registry.LOCAL_MACHINE, queryPath, registry.READ)
 		if err1 != nil {
 			return
 		}
-		// 读取所有子项
-		keyNames, err1 := k.ReadSubKeyNames(0)
+
+		// 读取注册表所有的key
+		keyNames, err1 = k.ReadSubKeyNames(0)
 		if err1 != nil {
 			return
 		}
-		*res = append(*res, getSoftwareDetails(startKey, keyNames, queryPath)...)
+
+		*res = append(*res, getSoftwareDetails(keyNames, queryPath)...)
 	}
 
-	res := []SoftwareDetails{}
+	var res []Software
 	waitGroup := new(sync.WaitGroup)
 	waitGroup.Add(1)
 
-	go queryKey(waitGroup, registry.LOCAL_MACHINE, &res)
+	go queryKey(waitGroup, &res)
 	waitGroup.Wait()
 	return res
 }
-func getSoftwareDetails(startKey registry.Key, appName []string, path string) []SoftwareDetails {
-	softwareDetails := []SoftwareDetails{}
+
+func getSoftwareDetails(appName []string, queryPath string) []Software {
+	softwareDetails := []Software{}
 	for _, value := range appName {
-		kQuery64Details, err := registry.OpenKey(startKey, path+"\\"+value, registry.READ)
+		kQuery64Details, err := registry.OpenKey(registry.LOCAL_MACHINE, queryPath+"\\"+value, registry.READ)
 		if err != nil {
 			continue
 		}
@@ -83,7 +89,7 @@ func getSoftwareDetails(startKey registry.Key, appName []string, path string) []
 		if v == 0 {
 			continue
 		}
-		softDetails := SoftwareDetails{displayIcon, displayName, displayVersion, installLocation, publisher, uninstallString}
+		softDetails := Software{displayIcon, displayName, displayVersion, installLocation, publisher, uninstallString, installDate}
 		softwareDetails = append(softwareDetails, softDetails)
 	}
 	return softwareDetails
