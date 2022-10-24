@@ -1,8 +1,7 @@
 package cmd
 
 import (
-	"errors"
-
+	"fmt"
 	"github.com/spf13/cobra"
 )
 
@@ -11,14 +10,12 @@ var rootCmd = &cobra.Command{
 	// use 指定使用信息，命令是怎么呗调用的
 	Use: "git",
 	// 简短的描述
-	Short: "Git is a distributed version control system.",
+	Short: "git 短描述",
 	// 长描述
-	Long: `Git is a free and open source distributed version control system
-designed to handle everything from small to very large projects 
-with speed and efficiency.`,
+	Long: `git 长描述，长描述，长描述`,
 	// 实际执行操作的函数
 	Run: func(cmd *cobra.Command, args []string) {
-		Error(cmd, args, errors.New("unrecognized command"))
+		fmt.Println("发生错误")
 	},
 }
 

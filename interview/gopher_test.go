@@ -2,8 +2,11 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"net/http"
 	"sync"
 	"testing"
+	"time"
 	"unicode/utf8"
 )
 
@@ -60,7 +63,7 @@ func TestSlice(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-// Go 则会返回元素对应数据类型的零值，比如 nil、'' 、false 和 0，取值操作总有值返回，故不能通过取出来的值来判断 key 是不是在 map 中。
+// Go 则会返回元素对应数据类型的零值，比如 nil、” 、false 和 0，取值操作总有值返回，故不能通过取出来的值来判断 key 是不是在 map 中。
 // 检查 key 是否存在可以用 map 直接访问，检查返回的第二个参数即可：
 // 检测map的key是否存在
 func TestMapKeyCheck(t *testing.T) {
@@ -174,4 +177,79 @@ func doIt(workerID int, done <-chan struct{}, wg *sync.WaitGroup) {
 	defer wg.Done()
 	<-done
 	fmt.Printf("[%v] is done\n", workerID)
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 通知剩余的协程不需要工作了
+func TestName(t *testing.T) {
+	ch := make(chan int)
+	done := make(chan struct{})
+
+	for i := 0; i < 3; i++ {
+		go func(idx int) {
+			select {
+			case ch <- (idx + 1) * 2:
+				fmt.Println(idx, "Send result")
+			case <-done:
+				fmt.Println(idx, "Exiting")
+			}
+		}(i)
+	}
+
+	fmt.Println("Result: ", <-ch)
+	close(done)
+	time.Sleep(3 * time.Second)
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 测试动态关闭channel
+func TestChannelKill(t *testing.T) {
+	inCh := make(chan int)
+	outCh := make(chan int)
+
+	go func() {
+		var in <-chan int = inCh
+		var out chan<- int
+		var val int
+
+		for {
+			select {
+			case out <- val:
+				println("--------")
+				out = nil
+				in = inCh
+			case val = <-in:
+				println("++++++++++")
+				out = outCh
+				in = nil
+			}
+		}
+	}()
+
+	go func() {
+		for r := range outCh {
+			fmt.Println("Result: ", r)
+		}
+	}()
+
+	time.Sleep(0)
+	inCh <- 1
+	inCh <- 2
+	time.Sleep(3 * time.Second)
+}
+
+func TestHttp(t *testing.T) {
+	resp, err := http.Get("https://api.ipify.org1/?format=json111")
+	fmt.Println(resp)
+	if err != nil {
+		fmt.Println("err:", err)
+	}
+	if resp != nil {
+		defer func(Body io.ReadCloser) {
+			err := Body.Close()
+			if err != nil {
+				fmt.Println("err:", err)
+			}
+		}(resp.Body)
+	}
 }

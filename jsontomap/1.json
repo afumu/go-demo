@@ -1,0 +1,16 @@
+{
+    "data": {
+        "openPort": "443,80,8080,22",
+        "fileName": [
+            "绝密",
+            "秘密",
+            "机密"
+        ],
+        "sensitiveService": [
+            "appinfo,bfe",
+            "bits",
+            "firewalld,auditd"
+        ]
+    },
+    "id": "1581842441462599682"
+}
