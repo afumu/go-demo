@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"sync"
 	"testing"
@@ -239,6 +241,7 @@ func TestChannelKill(t *testing.T) {
 }
 
 func TestHttp(t *testing.T) {
+
 	resp, err := http.Get("https://api.ipify.org1/?format=json111")
 	fmt.Println(resp)
 	if err != nil {
@@ -252,4 +255,32 @@ func TestHttp(t *testing.T) {
 			}
 		}(resp.Body)
 	}
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// json 转换默认把数字转换为float64，以下代码回报错
+func TestJson1(t *testing.T) {
+	var data = []byte(`{"status": 200}`)
+	var result map[string]interface{}
+
+	if err := json.Unmarshal(data, &result); err != nil {
+		log.Fatalln(err)
+	}
+
+	fmt.Printf("%T\n", result["status"]) // float64
+	var status = result["status"].(int)  // 类型断言错误
+	fmt.Println("Status value: ", status)
+}
+
+// 如果我们需要使用使用int类型的话，需要这么使用？
+func TestJson2(t *testing.T) {
+	var data = []byte(`{"status": 200}`)
+	var result map[string]interface{}
+
+	if err := json.Unmarshal(data, &result); err != nil {
+		log.Fatalln(err)
+	}
+
+	var status = uint64(result["status"].(float64))
+	fmt.Println("Status value: ", status)
 }
