@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -258,7 +259,7 @@ func TestHttp(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-// json 转换默认把数字转换为float64，以下代码回报错
+// json 转换默认把数字转换为float64，以下代码会报错
 func TestJson1(t *testing.T) {
 	var data = []byte(`{"status": 200}`)
 	var result map[string]interface{}
@@ -267,12 +268,12 @@ func TestJson1(t *testing.T) {
 		log.Fatalln(err)
 	}
 
-	fmt.Printf("%T\n", result["status"]) // float64
-	var status = result["status"].(int)  // 类型断言错误
+	fmt.Printf("%T\n", result["status"])
+	var status = result["status"].(int)
 	fmt.Println("Status value: ", status)
 }
 
-// 如果我们需要使用使用int类型的话，需要这么使用？
+// 如果我们需要使用使用int类型的话，需要这么使用
 func TestJson2(t *testing.T) {
 	var data = []byte(`{"status": 200}`)
 	var result map[string]interface{}
@@ -283,4 +284,56 @@ func TestJson2(t *testing.T) {
 
 	var status = uint64(result["status"].(float64))
 	fmt.Println("Status value: ", status)
+}
+
+// 使用decoder转换
+func TestJson3(t *testing.T) {
+	var data = []byte(`{"status": 200}`)
+	var result map[string]interface{}
+
+	var decoder = json.NewDecoder(bytes.NewReader(data))
+	decoder.UseNumber()
+
+	if err := decoder.Decode(&result); err != nil {
+		log.Fatalln(err)
+	}
+
+	var status, _ = result["status"].(json.Number).Int64()
+	fmt.Println("Status value: ", status)
+}
+
+// 状态名称可能是 int 也可能是 string，指定为 json.RawMessage 类型
+func TestJson4(t *testing.T) {
+	records := [][]byte{
+		[]byte(`{"status":200, "tag":"one"}`),
+		[]byte(`{"status":"ok", "tag":"two"}`),
+	}
+
+	// 遍历所有的数据
+	for idx, record := range records {
+		var result struct {
+			StatusCode uint64
+			StatusName string
+			Status     json.RawMessage `json:"status"`
+			Tag        string          `json:"tag"`
+		}
+
+		err := json.NewDecoder(bytes.NewReader(record)).Decode(&result)
+
+		var name string
+		err = json.Unmarshal(result.Status, &name)
+		// 如果没有发生异常旧代表是字符串
+		if err == nil {
+			result.StatusName = name
+		}
+
+		var code uint64
+		// 如果没有发生异常旧代表是uint64
+		err = json.Unmarshal(result.Status, &code)
+		if err == nil {
+			result.StatusCode = code
+		}
+
+		fmt.Printf("[%v] result => %+v\n", idx, result)
+	}
 }
