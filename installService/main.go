@@ -9,6 +9,7 @@ import (
 	"github.com/kardianos/service"
 )
 
+// 服务自动启动
 type program struct {
 	log service.Logger
 	cfg *service.Config
@@ -49,7 +50,6 @@ func main() {
 		if os.Args[1] == "install" {
 			x := s.Install()
 			if x != nil {
-				fmt.Println("error:", x.Error())
 				return
 			}
 			fmt.Println("服务安装成功")
