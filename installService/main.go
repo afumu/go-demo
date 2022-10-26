@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -20,16 +21,31 @@ func (p *program) Start(s service.Service) error {
 	return nil
 }
 
-func (p *program) run() {
-	for {
-		fmt.Println("1111111111111111")
-		time.Sleep(3 * time.Second)
+func (p *program) Stop(s service.Service) error {
+	err := s.Stop()
+	if err != nil {
+		fmt.Println("关闭错误：", err)
 	}
-	wg.Done()
+	return err
 }
 
-func (p *program) Stop(s service.Service) error {
-	return nil
+func (p *program) run() {
+	for {
+		now := time.Now()
+		sprintf := fmt.Sprintf("%v", now)
+		fmt.Println(sprintf)
+		time.Sleep(3 * time.Second)
+
+		dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+		fmt.Println("dir", dir)
+
+		file, err := os.OpenFile(dir+string(filepath.Separator)+"test.txt", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0677)
+		if err != nil {
+			fmt.Println(err)
+		}
+		file.Write([]byte(sprintf + "\n"))
+	}
+	wg.Done()
 }
 
 var wg sync.WaitGroup
@@ -37,9 +53,9 @@ var wg sync.WaitGroup
 func main() {
 	wg.Add(1)
 	svcConfig := &service.Config{
-		Name:        "test-service",
-		DisplayName: "test-service",
-		Description: "test-service",
+		Name:        "agent",
+		DisplayName: "agent",
+		Description: "态势感知客户端",
 	}
 	prg := &program{}
 	s, err := service.New(prg, svcConfig)
