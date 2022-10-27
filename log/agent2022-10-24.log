@@ -1,0 +1,19 @@
+{"L":"INFO","T":"2022-10-24T14:38:48.472+0800","C":"zap/main.go:78","M":"this is info {ID 11 1  <nil>}"}
+{"L":"ERROR","T":"2022-10-24T14:38:48.472+0800","C":"zap/main.go:79","M":"this is info {ID 11 1  <nil>}"}
+{"L":"INFO","T":"2022-10-24T14:38:51.484+0800","C":"zap/main.go:83","M":"this is info {ID 11 1  <nil>}"}
+{"L":"ERROR","T":"2022-10-24T14:38:51.484+0800","C":"zap/main.go:84","M":"this is info {ID 11 1  <nil>}"}
+{"L":"INFO","T":"2022-10-24T15:01:01.999+0800","C":"zap/main.go:78","M":"this is info {ID 11 1  <nil>}"}
+{"L":"ERROR","T":"2022-10-24T15:01:01.999+0800","C":"zap/main.go:79","M":"this is info {ID 11 1  <nil>}"}
+{"L":"INFO","T":"2022-10-24T15:01:01.999+0800","C":"zap/main.go:80","M":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+{"L":"INFO","T":"2022-10-24T15:01:05.001+0800","C":"zap/main.go:84","M":"this is info {ID 11 1  <nil>}"}
+{"L":"ERROR","T":"2022-10-24T15:01:05.001+0800","C":"zap/main.go:85","M":"this is info {ID 11 1  <nil>}"}
+{"L":"INFO","T":"2022-10-24T15:01:19.213+0800","C":"zap/main.go:78","M":"this is info {ID 11 1  <nil>}"}
+{"L":"ERROR","T":"2022-10-24T15:01:19.213+0800","C":"zap/main.go:79","M":"this is info {ID 11 1  <nil>}"}
+{"L":"INFO","T":"2022-10-24T15:01:19.213+0800","C":"zap/main.go:80","M":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+{"L":"INFO","T":"2022-10-24T15:01:22.221+0800","C":"zap/main.go:84","M":"this is info {ID 11 1  <nil>}"}
+{"L":"ERROR","T":"2022-10-24T15:01:22.222+0800","C":"zap/main.go:85","M":"this is info {ID 11 1  <nil>}"}
+{"L":"INFO","T":"2022-10-24T15:02:34.226+0800","C":"zap/main.go:58","M":"this is info {ID 11 1  <nil>}"}
+{"L":"ERROR","T":"2022-10-24T15:02:34.227+0800","C":"zap/main.go:59","M":"this is info {ID 11 1  <nil>}"}
+{"L":"INFO","T":"2022-10-24T15:02:34.227+0800","C":"zap/main.go:60","M":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+{"L":"INFO","T":"2022-10-24T15:02:37.242+0800","C":"zap/main.go:64","M":"this is info {ID 11 1  <nil>}"}
+{"L":"ERROR","T":"2022-10-24T15:02:37.242+0800","C":"zap/main.go:65","M":"this is info {ID 11 1  <nil>}"}

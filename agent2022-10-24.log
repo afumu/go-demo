@@ -1,0 +1,2 @@
+{"L":"INFO","T":"2022-10-24T14:13:16.600+0800","C":"zap/main.go:75","M":"this is info {ID 11 1  <nil>}"}
+{"L":"ERROR","T":"2022-10-24T14:13:16.601+0800","C":"zap/main.go:76","M":"this is info {ID 11 1  <nil>}"}
