@@ -1,11 +1,13 @@
 package main
 
 import (
-	"gorm.io/driver/sqlite"
+	"fmt"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"testing"
 )
 
+/*
 type Product struct {
 	gorm.Model
 	Code  string
@@ -37,4 +39,49 @@ func Test_Gorm(t *testing.T) {
 
 	// Delete - 删除 product
 	db.Delete(&product, 1)
+}
+*/
+type Test1 struct {
+	gorm.Model
+	Code  string
+	Price uint
+}
+
+var globalDb *gorm.DB
+
+func init() {
+	dsn := "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
+	var err error
+	globalDb, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+func TestCreate(t *testing.T) {
+	globalDb.AutoMigrate(&Test1{})
+	// Create
+	globalDb.Create(&Test1{Code: "D42", Price: 100})
+}
+
+func TestFind(t *testing.T) {
+	// Read
+	var test1 Test1
+	globalDb.First(&test1, 1)                 // 根据整型主键查找
+	globalDb.First(&test1, "code = ?", "D42") // 查找 code 字段值为 D42 的记录
+	fmt.Println(test1)
+}
+
+func TestUpdate(t *testing.T) {
+	var test1 Test1
+	globalDb.First(&test1, 1)
+	globalDb.First(&test1, "code = ?", "D42")
+
+	// Update - 将 product 的 price 更新为 200
+	globalDb.Model(&test1).Update("Price", 200)
+
+	// Update - 更新多个字段
+	globalDb.Model(&test1).Updates(Product{Price: 200, Code: "F42"}) // 仅更新非零值字段
+	globalDb.Model(&test1).Updates(map[string]interface{}{"Price": 200, "Code": "F42"})
+
 }
