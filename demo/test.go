@@ -1,9 +1,6 @@
 package main
 
-import (
-	"fmt"
-	"runtime"
-)
+import "fmt"
 
 type User struct {
 	Name string
@@ -16,16 +13,19 @@ func setUser(list []*User) {
 }
 
 func main() {
-	//runtime.GOARCH 返回当前的系统架构；runtime.GOOS 返回当前的操作系统。
-	sysType := runtime.GOOS
+	const AgentServiceName = "hostAgent"
+	const AgentServiceDisplayName = "Agent"
+	const AgentServiceDesc = "态势感知主机代理"
 
-	if sysType == "linux" {
-		// LINUX系统
-		fmt.Println("Linux system")
-	}
+	const UpgradeServiceName = "agentUpgrade"
+	const UpgradeServiceDisplayName = "Agent Upgrade"
+	const UpgradeServiceDesc = "态势感知主机代理升级服务"
 
-	if sysType == "windows" {
-		// windows系统
-		fmt.Println("Windows system")
-	}
+	// 检测agent状态
+	const CheckAgentStatus = `
+#!/bin/bash
+systemctl status ` + AgentServiceName + `
+exit 0
+`
+	fmt.Println(CheckAgentStatus)
 }
