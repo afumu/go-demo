@@ -6,6 +6,7 @@ require (
 	github.com/acmestack/gobatis v0.2.8
 	github.com/acmestack/gobatis-plus v0.0.1
 	github.com/aquasecurity/go-dep-parser v0.0.0-20220824115155-600849a106bd
+	github.com/axgle/mahonia v0.0.0-20180208002826-3358181d7394
 	github.com/boltdb/bolt v1.3.1
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/fvbock/endless v0.0.0-20170109170031-447134032cb6
@@ -17,6 +18,7 @@ require (
 	github.com/knqyf263/go-rpmdb v0.0.0-20220719122909-d637bcc36860
 	github.com/masahiro331/go-mvn-version v0.0.0-20210429150710-d3157d602a08
 	github.com/olekukonko/tablewriter v0.0.5
+	github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca
 	github.com/saracen/walker v0.1.3
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/spf13/cobra v1.5.0
@@ -25,6 +27,7 @@ require (
 	golang.org/x/sys v0.0.0-20220908164124-27713097b956
 	golang.org/x/text v0.3.6
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
+	gorm.io/driver/mysql v1.4.3
 	gorm.io/driver/sqlite v1.3.6
 	gorm.io/gorm v1.23.8
 )
@@ -84,7 +87,6 @@ require (
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gorm.io/driver/mysql v1.4.3 // indirect
 	lukechampine.com/uint128 v1.1.1 // indirect
 	modernc.org/cc/v3 v3.36.0 // indirect
 	modernc.org/ccgo/v3 v3.16.6 // indirect

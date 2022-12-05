@@ -1,0 +1,66 @@
+360杀毒扫描日志
+
+病毒库日期：2022-09-08
+扫描时间：2022-11-08 17:24:51
+扫描用时：01:58:15
+扫描类型：全盘扫描
+扫描文件总数：770182
+项目总数：15
+清除项目数：0
+
+扫描选项
+----------------------
+扫描所有文件：否
+扫描压缩包：否
+发现病毒处理方式：由用户选择处理
+扫描磁盘引导区：是
+扫描 Rootkit：否
+使用云查杀引擎：是
+使用QVM人工智能引擎：是
+扫描建议修复项：是
+常规引擎设置：未使用
+
+扫描内容
+----------------------
+全盘
+
+白名单设置
+----------------------
+
+
+扫描结果
+======================
+高危风险项
+----------------------
+C:\Program Files\junan-situation-awareness-client\态势感知主机代理.exe	无效的注册表启动项	未处理
+C:\ProgramData\Mozilla-1de4eec8-1241-4177-a864-e594e8d1fb38\updates\308046B0AF4A39CB\backgroundupdate.moz_log	建议禁止开机自动运行的程序	未处理
+C:\Users\000000\AppData\Local\Microsoft\WindowsApps\CWMBEUAN.sys	RootKit.Win64.Agent.BJ	未处理
+C:\Users\000000\AppData\Local\Microsoft\WindowsApps\ZSNCDZGX.sys	RootKit.Win64.Agent.BK	未处理
+D:\Ming\态势感知\upload\client\go-update.exe	HEUR/QVM202.0.2B46.Malware.Gen	未处理
+G:\$RECYCLE.BIN\S-1-5-21-1912259984-1296428115-3988633005-1001\$RASZRXN\G0902001\(_1024手机发布器.apk	Android手机恶意程序	未处理
+
+
+系统异常项
+----------------------
+远程桌面被开启	远程桌面	未处理
+无效的快捷方式：Xftp.lnk	桌面快捷方式	未处理
+
+可能影响开机速度的启动项
+----------------------
+Java升级检测程序：禁止率85%	建议禁止的开机启动项	未处理
+office助手更新服务：禁止率70%	建议禁止的开机启动项	未处理
+谷歌软件升级任务：禁止率78%	建议禁止的开机启动项	未处理
+快压的升级任务：禁止率61%	建议禁止的开机启动项	未处理
+磁盘清理任务：禁止率85%	建议禁止的开机启动项	未处理
+火狐浏览器启动任务：禁止率--	建议禁止的开机启动项	未处理
+微软IE的RSS的更新任务：禁止率31%	建议禁止的开机启动项	未处理
+
+
+
+可疑文件上传结果
+----------------------
+c:\programdata\mozilla-1de4eec8-1241-4177-a864-e594e8d1fb38\updates\308046b0af4a39cb\backgroundupdate.moz_log	上传成功
+d:\ming\态势感知\upload\__uni__aa0fe63__20221021165115_1666941499471.apk	上传成功
+d:\ming\态势感知\upload\client\go-update.exe	上传成功
+f:\navicat\navicat premium 15\libcc.dll	上传成功
+f:\tool\agent\agent-1.4.1-window\bin\upgrade.exe	上传成功
