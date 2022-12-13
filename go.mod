@@ -8,11 +8,13 @@ require (
 	github.com/aquasecurity/go-dep-parser v0.0.0-20220824115155-600849a106bd
 	github.com/axgle/mahonia v0.0.0-20180208002826-3358181d7394
 	github.com/boltdb/bolt v1.3.1
+	github.com/dave/jennifer v1.6.0
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/fvbock/endless v0.0.0-20170109170031-447134032cb6
 	github.com/gin-gonic/gin v1.8.1
 	github.com/golang/mock v1.6.0
 	github.com/google/gopacket v1.1.19
+	github.com/goplus/gox v1.11.22
 	github.com/kardianos/service v1.2.2
 	github.com/knqyf263/go-rpm-version v0.0.0-20220614171824-631e686d1075
 	github.com/knqyf263/go-rpmdb v0.0.0-20220719122909-d637bcc36860
@@ -37,7 +39,6 @@ require (
 	github.com/Masterminds/semver/v3 v3.1.1 // indirect
 	github.com/Masterminds/sprig/v3 v3.2.2 // indirect
 	github.com/acmestack/godkits v0.0.10 // indirect
-	github.com/dave/jennifer v1.6.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
@@ -47,7 +48,6 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/goccy/go-json v0.9.7 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/goplus/gox v1.11.22 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.1 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect

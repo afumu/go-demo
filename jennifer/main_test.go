@@ -32,7 +32,9 @@ var UserColumn = struct {
 }
 var UserField = struct {
 	ID string
-}{}
+}{
+	ID: "id",
+}
 
 func TestName(t *testing.T) {
 	/*	f := NewFile("main")
@@ -41,6 +43,7 @@ func TestName(t *testing.T) {
 		)*/
 
 	f := Var().Id("UserField").Op("=").Id("struct").Id("{").
-		Id("\n").Id("ID").String().Id("\n").Id("}").Id("{").Id("}")
+		Id("\n").Id("ID").String().Id("\n").Id("}").Id("{").Id("\n").
+		Id("ID").Op(":").Id("\"id\"").Id(",").Id("\n").Id("}")
 	fmt.Printf("%#v\n", f)
 }
