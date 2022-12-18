@@ -1,10 +1,12 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"testing"
+	"time"
 )
 
 /*
@@ -41,6 +43,7 @@ func Test_Gorm(t *testing.T) {
 	db.Delete(&product, 1)
 }
 */
+
 type Test1 struct {
 	gorm.Model
 	Code  string
@@ -84,4 +87,42 @@ func TestUpdate(t *testing.T) {
 	globalDb.Model(&test1).Updates(Product{Price: 200, Code: "F42"}) // 仅更新非零值字段
 	globalDb.Model(&test1).Updates(map[string]interface{}{"Price": 200, "Code": "F42"})
 
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------------------------------
+type User struct {
+	ID           uint
+	Name         string
+	Email        *string
+	Age          uint8
+	Birthday     *time.Time
+	MemberNumber sql.NullString
+	ActivatedAt  sql.NullTime
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+}
+
+func TestCreteUser(t *testing.T) {
+	err := globalDb.AutoMigrate(&User{})
+	if err != nil {
+		fmt.Println("创建数据库错误")
+	}
+	birthday := time.Now()
+	user := User{Name: "Jinzhu", Age: 18, Birthday: &birthday}
+
+	result := globalDb.Create(&user)
+	fmt.Println(user.ID)
+	fmt.Println("werwsdfsfsdfsdf ")
+	fmt.Println(result.Error)
+	fmt.Println(result.RowsAffected)
+}
+
+func TestCreateBatch(t *testing.T) {
+	var users = []User{{Name: "jinzhu1"}, {Name: "jinzhu2"}, {Name: "jinzhu3"}}
+	globalDb.Create(&users)
+
+	for _, user := range users {
+		id := user.ID
+		fmt.Println(id)
+	}
 }
