@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"runtime"
+	"regexp"
+	"strings"
 )
 
 type User struct {
@@ -16,16 +17,24 @@ func setUser(list []*User) {
 }
 
 func main() {
-	//runtime.GOARCH 返回当前的系统架构；runtime.GOOS 返回当前的操作系统。
-	sysType := runtime.GOOS
-
-	if sysType == "linux" {
-		// LINUX系统
-		fmt.Println("Linux system")
+	// 如果是upgrade文件名，不需要更新，防止upgrade二进制包错误导致永远无法更新
+	var name = "-name=123    -age=123"
+	name = DeleteExtraSpace(name)
+	split := strings.Split(name, " ")
+	for _, v := range split {
+		fmt.Println(v)
 	}
+}
 
-	if sysType == "windows" {
-		// windows系统
-		fmt.Println("Windows system")
+func DeleteExtraSpace(s string) string {
+	regStr := "\\s{2,}"
+	reg, _ := regexp.Compile(regStr)
+	tmpStr := make([]byte, len(s))
+	copy(tmpStr, s)
+	spcIndex := reg.FindStringIndex(string(tmpStr))
+	for len(spcIndex) > 0 {
+		tmpStr = append(tmpStr[:spcIndex[0]+1], tmpStr[spcIndex[1]:]...)
+		spcIndex = reg.FindStringIndex(string(tmpStr))
 	}
+	return string(tmpStr)
 }

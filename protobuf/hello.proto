@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package demo;
+
+option go_package = "./;main";
+
+message StudyInfo {
+  int64              id       = 1; //id
+  string             name     = 2; //学习的科目名称
+  int32              duration = 3; //学习的时长 单位秒
+  map<string, int32> score    = 4; //学习的分数
+}

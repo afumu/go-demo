@@ -1,51 +1,41 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"github.com/aquasecurity/go-dep-parser/pkg/java/jar"
-	"github.com/aquasecurity/go-dep-parser/pkg/types"
-	"github.com/saracen/walker"
 	"os"
-	"path/filepath"
-	"strings"
+	"reflect"
+	"runtime"
+	"test-demo/walker/lib"
+	"time"
 )
 
-var requiredExtensions = []string{".jar", ".war", ".ear", ".par"}
-
 func main() {
-	var libs []types.Library
-	var deps []types.Dependency
-	walkFn := func(pathname string, fi os.FileInfo) error {
-		fmt.Printf("%s: %d bytes\n", pathname, fi.Size())
-		ext := filepath.Ext(pathname)
-		for _, required := range requiredExtensions {
-			if strings.EqualFold(ext, required) {
-				file, err := os.Open(pathname)
-				if err != nil {
-					fmt.Println(err.Error())
-				}
-				fileInfo, err := file.Stat()
-				if err != nil {
-					fmt.Println(err.Error())
-				}
-				p := jar.NewParser(jar.WithSize(fileInfo.Size()), jar.WithFilePath(pathname), jar.WithOffline(true))
-
-				libs, deps, err = p.Parse(file)
-			}
-		}
-		return nil
+	file, err := os.OpenFile("test.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0667)
+	if err != nil {
+		fmt.Println(err)
 	}
+	defer file.Close()
+	sprintf := fmt.Sprintf("%v\n", time.Now())
+	file.WriteString(sprintf)
+}
 
-	// error function called for every error encountered
-	errorCallbackOption := walker.WithErrorCallback(func(pathname string, err error) error {
-		if os.IsPermission(err) {
-			return nil
-		}
-		return err
-	})
-
-	walker.Walk("D:\\workplace\\junan-template", walkFn, errorCallbackOption)
-
-	fmt.Printf("%+v", libs)
-	fmt.Printf("%+v", deps)
+func OpenFile(dirname string) (*os.File, error) {
+	var method string
+	if runtime.GOOS == "windows" {
+		method = "Open"
+	} else {
+		method = "OpenFileNoCache"
+	}
+	var open = &lib.Open{}
+	openValue := reflect.ValueOf(open)
+	infoFunc := openValue.MethodByName(method)
+	file := infoFunc.Call([]reflect.Value{reflect.ValueOf(dirname)})
+	var f *os.File
+	if file[0].CanInterface() {
+		value := file[0]
+		f = value.Interface().(*os.File)
+		return f, nil
+	}
+	return nil, errors.New("读取file失败")
 }
