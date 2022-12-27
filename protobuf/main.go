@@ -36,4 +36,5 @@ func main() {
 		return
 	}
 	fmt.Printf("二进制转成结构体的结果：%v\n", &newStudyInfo)
+
 }
