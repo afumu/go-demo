@@ -3,6 +3,7 @@ package interview2
 import (
 	"fmt"
 	"testing"
+	"time"
 	"unsafe"
 )
 
@@ -55,15 +56,15 @@ type Example struct {
 }
 
 type A struct {
-	a int32
-	b int64
-	c int32
+	a int32 // 4
+	b int64 // 8
+	c int32 // 4
 }
 
 type B struct {
-	a int32
-	b int32
-	c int64
+	a int32 // 4
+	b int32 // 4
+	c int64 // 8
 }
 
 func Test5(t *testing.T) {
@@ -71,7 +72,7 @@ func Test5(t *testing.T) {
 	//fmt.Println(unsafe.Sizeof(A{}))       // 24
 	//fmt.Println(unsafe.Sizeof(B{}))       // 16
 	//fmt.Println(unsafe.Alignof(int(1)))
-	fmt.Println(unsafe.Sizeof(int64(1)))
+	fmt.Println(unsafe.Alignof(A{}))
 
 }
 
@@ -91,4 +92,102 @@ func appendData(s []int) {
 	s = append(s, 10)
 	fmt.Println(s)
 	fmt.Println(len(s), cap(s))
+
+	//var map1 map[string]string
+	//s2 := map1["11"]
+}
+
+func Test7(t *testing.T) {
+	var array [10]int
+	var slice = array[5:6]
+	fmt.Println("lenth of slice: ", len(slice))
+	fmt.Println("capacity of slice: ", cap(slice))
+	fmt.Println(&slice[0] == &array[5])
+}
+
+func AddElement(slice []int, e int) []int {
+	return append(slice, e)
+}
+
+func Test8(t *testing.T) {
+	var slice []int
+	slice = append(slice, 1, 2, 3)
+	newSlice := AddElement(slice, 4)
+	newSlice = AddElement(slice, 6)
+	fmt.Println(&slice[0], &newSlice[0])
+	fmt.Println(&slice[0] == &newSlice[0])
+}
+
+func Test9(t *testing.T) {
+	orderLen := 5
+	order := make([]uint16, 2*orderLen)
+	pollorder := order[:orderLen:orderLen]
+	lockorder := order[orderLen:][:orderLen:orderLen]
+	fmt.Println("len(pollorder) = ", len(pollorder)) // 5
+	fmt.Println("cap(pollorder) = ", cap(pollorder)) // 5
+	fmt.Println("len(lockorder) = ", len(lockorder)) // 0
+	fmt.Println("cap(lockorder) = ", cap(lockorder)) // 0
+}
+
+func Test10(t *testing.T) {
+	var slice []int
+	slice = append(slice, 1, 2, 3)
+	newSlice := AddElement(slice, 4)
+	newSlice = AddElement(newSlice, 6)
+	fmt.Println(newSlice[4])
+}
+
+func Test11(t *testing.T) {
+	var name = "zhangsan"
+	updateStr(name)
+}
+
+func updateStr(s string) {
+	s = "lisi"
+}
+
+func Test12(t *testing.T) {
+	var c1 = make(chan int)
+	var c2 = make(chan int)
+
+	select {
+	case <-c1:
+		fmt.Println("c1")
+	case <-c2:
+		fmt.Println("c2")
+	}
+	fmt.Println("main")
+}
+
+func Test13(t *testing.T) {
+	ch := make(chan int)
+	go func() {
+		for range time.Tick(1 * time.Second) {
+			ch <- 0
+		}
+	}()
+
+	for {
+		select {
+		case <-ch:
+			println("case1")
+		case <-ch:
+			println("case2")
+		}
+	}
+}
+
+func Test14(t *testing.T) {
+	var slice = make([]int64, 5000000)
+	for i := 0; i < 5000000; i++ {
+		slice = append(slice, int64(i))
+	}
+	start := time.Now().UnixMilli()
+	var sum int64
+	for i, _ := range slice {
+		sum += slice[i] + int64(i)
+	}
+	end := time.Now().UnixMilli()
+	fmt.Println((end - start))
+	fmt.Println(sum)
 }

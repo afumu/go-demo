@@ -2,8 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"plugin"
 )
 
 var path string
@@ -15,15 +13,15 @@ func init() {
 }
 
 func main() {
-	flag.Parse()
-	fmt.Println("soPath: ", path)
-	fmt.Println("method: ", method)
-	ptr, err := plugin.Open(path)
-	if err != nil {
-		fmt.Println(err)
-	}
-	methodFunc, _ := ptr.Lookup(method)
-	methodFunc.(func())()
+	/*	flag.Parse()
+		fmt.Println("soPath: ", path)
+		fmt.Println("method: ", method)
+		ptr, err := plugin.Open(path)
+		if err != nil {
+			fmt.Println(err)
+		}
+		methodFunc, _ := ptr.Lookup(method)
+		methodFunc.(func())()*/
 
 	/*	Add, _ := ptr.Lookup("Add")
 		sum := Add.(func(int, int) int)(5, 4)
@@ -37,5 +35,19 @@ func main() {
 	//output, err := cmd.CombinedOutput()
 	//fmt.Printf("output: %s\n", string(output))
 	//fmt.Printf("err: %v", err)
+
+	//var c1 = make(chan int)
+	//var c2 = make(chan int)
+	//
+	//select {
+	//case <-c1:
+	//	fmt.Println("c1")
+	//case <-c2:
+	//	fmt.Println("c2")
+	//default:
+	//	fmt.Println("default")
+	//}
+	//fmt.Println("main")
+	select {}
 
 }
