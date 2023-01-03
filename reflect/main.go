@@ -106,4 +106,5 @@ func print(dest interface{}) {
 	//}
 	//of := reflect.ValueOf()
 	//fmt.Println(of.Elem())
+
 }
