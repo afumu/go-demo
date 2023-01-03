@@ -188,6 +188,6 @@ func Test14(t *testing.T) {
 		sum += slice[i] + int64(i)
 	}
 	end := time.Now().UnixMilli()
-	fmt.Println((end - start))
+	fmt.Println(end - start)
 	fmt.Println(sum)
 }
