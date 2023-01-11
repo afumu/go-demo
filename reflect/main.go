@@ -1,10 +1,5 @@
 package main
 
-import (
-	"fmt"
-	"reflect"
-)
-
 type Address struct {
 	Name string `json:"name"`
 	Size int
@@ -33,12 +28,12 @@ func main() {
 		fmt.Println("--------------")*/
 
 	//var dest *User = &User{}
-	var i Iter
+	//var i Iter
 	//var i2 Iter
 	//i2 = dest
-	i = 1
-	of := reflect.TypeOf(i)
-	fmt.Println(of.Kind())
+	//i = 1
+	//of := reflect.TypeOf(i)
+	//fmt.Println(of.Kind())
 	//i = dest
 	//value := reflect.ValueOf(dest)
 	//fmt.Println(value.Kind() == reflect.Interface)
@@ -90,21 +85,29 @@ func main() {
 	//	get := name.Tag.Get("json")
 	//	fmt.Println(get)
 	//}
-
+	print()
 }
 
-func print(dest interface{}) {
+func print() {
 	//value := reflect.ValueOf(dest)
-	of := reflect.TypeOf(dest)
+	//of := reflect.TypeOf(dest)
 	//modelType := value.Type()
 	//modelType := reflect.Indirect(value).Type()
 
 	// 如果 modelType 是一个接口的话
-	fmt.Println(of.Kind() == reflect.Interface)
+	//fmt.Println(of.Kind() == reflect.Interface)
 	//if value.Kind() == reflect.Interface {
 	//	//value = reflect.Indirect(reflect.ValueOf(dest)).Elem().Type()
 	//}
 	//of := reflect.ValueOf()
 	//fmt.Println(of.Elem())
+
+	//
+	//var x float64 = 1.0
+	//
+	//of := reflect.ValueOf(x)
+	//f := of.Interface().(float64)
+	//fmt.Println(of)
+	//fmt.Println(&f)
 
 }
