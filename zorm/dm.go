@@ -13,13 +13,10 @@ import (
 	"strconv"
 )
 
-var ctx = context.Background()
-var db *zorm.DBDao
-
-func init() {
+func initDm(url string) {
 	var err error
 	dbConfig := &zorm.DataSourceConfig{
-		DSN: "dm://BSDS:bsds-abcd-1234@192.168.3.31:5236",
+		DSN: url,
 		//sql.Open(DriverName,DSN) DriverName就是驱动的sql.Open第一个字符串参数,根据驱动实际情况获取
 		DriverName:            "dm",
 		Dialect:               "dm",
@@ -36,7 +33,7 @@ func init() {
 		panic(err)
 	}
 
-	//注册达梦TEXT类型转string插件,dialectColumnType 值是 Dialect.字段类型 ,例如 dm.TEXT
+	// 注册达梦TEXT类型转string插件,dialectColumnType 值是 Dialect.字段类型 ,例如 dm.TEXT
 	zorm.RegisterCustomDriverValueConver("dm.TEXT", CustomDMText{})
 }
 
@@ -49,7 +46,6 @@ func (dmtext CustomDMText) GetDriverValue(ctx context.Context, columnType *sql.C
 	// 如果需要使用structFieldType,需要先判断是否为nil
 	// if structFieldType != nil {
 	// }
-
 	return &dm.DmClob{}, nil
 }
 
