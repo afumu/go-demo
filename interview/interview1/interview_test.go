@@ -567,6 +567,20 @@ func TestChannel2(t *testing.T) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 // 实现精细超时控制
+func TestWait(t *testing.T) {
+	result, err := first(
+		fakeWeatherServer("open-weather-1", 200),
+		fakeWeatherServer("open-weather-2", 1000),
+		fakeWeatherServer("open-weather-3", 600),
+	)
+	if err != nil {
+		log.Println("invoke first error:", err)
+		return
+	}
+	fmt.Println(result)
+	time.Sleep(10 * time.Second)
+}
+
 type result struct {
 	value string
 }
@@ -576,10 +590,13 @@ func first(servers ...*httptest.Server) (result, error) {
 	c := make(chan result)
 	// 这里设置取消http请求的取消操作
 	ctx, cancel := context.WithCancel(context.Background())
+
 	// 一旦方法被执行完成了，直接取消其他的请求
-	// 这个非常秒呀！
 	defer cancel()
+
 	queryFunc := func(i int, server *httptest.Server) {
+
+		// 模拟发起http请求
 		url := server.URL
 		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
@@ -587,7 +604,6 @@ func first(servers ...*httptest.Server) (result, error) {
 			return
 		}
 		req = req.WithContext(ctx)
-
 		log.Printf("query goroutine-%d: send request...\n", i)
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
@@ -595,8 +611,11 @@ func first(servers ...*httptest.Server) (result, error) {
 			return
 		}
 		log.Printf("query goroutine-%d: get response\n", i)
+
 		defer resp.Body.Close()
 		body, _ := ioutil.ReadAll(resp.Body)
+
+		// 把结果存储到c通道中
 		c <- result{
 			value: string(body),
 		}
@@ -609,12 +628,15 @@ func first(servers ...*httptest.Server) (result, error) {
 
 	select {
 	case r := <-c:
+		// 这里获取到某一个请求有结果之后，直接返回
+		// 然后 defer cancel() 被执行，然后其他的请求就会被取消掉，避免浪费资源
 		return r, nil
 	case <-time.After(500 * time.Millisecond):
 		return result{}, errors.New("timeout")
 	}
 }
 
+// 模拟http服务
 func fakeWeatherServer(name string, interval int) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter,
 		r *http.Request) {
@@ -622,18 +644,6 @@ func fakeWeatherServer(name string, interval int) *httptest.Server {
 		time.Sleep(time.Duration(interval) * time.Millisecond)
 		w.Write([]byte(name + ":ok"))
 	}))
-}
-
-func TestWait(t *testing.T) {
-	result, err := first(fakeWeatherServer("open-weather-1", 200),
-		fakeWeatherServer("open-weather-2", 1000),
-		fakeWeatherServer("open-weather-3", 600))
-	if err != nil {
-		log.Println("invoke first error:", err)
-		return
-	}
-	fmt.Println(result)
-	time.Sleep(10 * time.Second)
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
