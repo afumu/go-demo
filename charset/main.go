@@ -12,6 +12,8 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
+	fmt.Println(string(file))
+	fmt.Println("-------------------------------------------------------------------------------------------------------")
 	detector := chardet.NewTextDetector()
 	charset, err := detector.DetectBest(file)
 	fmt.Println(charset.Charset)

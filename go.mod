@@ -27,9 +27,8 @@ require (
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/spf13/cobra v1.5.0
 	github.com/stretchr/testify v1.8.0
-	github.com/tangpanqing/aorm v1.1.9
 	go.uber.org/zap v1.23.0
-	golang.org/x/sys v0.3.0
+	golang.org/x/sys v0.5.0
 	golang.org/x/text v0.5.0
 	google.golang.org/protobuf v1.28.1
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
@@ -41,12 +40,14 @@ require (
 require (
 	gitee.com/chunanyong/dm v1.8.10 // indirect
 	gitee.com/chunanyong/zorm v1.6.4 // indirect
+	github.com/AllenDang/w32 v0.0.0-20180428130237-ad0a36d80adc // indirect
 	github.com/ArtisanCloud/PowerLibs/v3 v3.0.2 // indirect
 	github.com/ArtisanCloud/PowerSocialite/v3 v3.0.3 // indirect
 	github.com/ArtisanCloud/PowerWeChat/v3 v3.0.5 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.1.1 // indirect
 	github.com/Masterminds/sprig/v3 v3.2.2 // indirect
+	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/acmestack/godkits v0.0.10 // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -72,6 +73,7 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
+	github.com/lxn/win v0.0.0-20210218163916-a377121e959e // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mattn/go-sqlite3 v1.14.16 // indirect

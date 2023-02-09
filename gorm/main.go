@@ -2,8 +2,12 @@ package main
 
 import (
 	"fmt"
+	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"log"
+	"time"
 )
 
 type Product struct {
@@ -12,7 +16,34 @@ type Product struct {
 	Price uint
 }
 
+var gormDb *gorm.DB
+
+type Student struct {
+	ID        int `gorm:"primaryKey"`
+	Name      string
+	Age       uint8
+	Email     string
+	Birthday  time.Time
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+func init() {
+	dsn := "root:root-abcd-1234@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
+	var err error
+	gormDb, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
+	if err != nil {
+		log.Println(err)
+	}
+}
+
 func main() {
+
+}
+
+func funcName() {
 	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
