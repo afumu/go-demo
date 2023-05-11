@@ -33,9 +33,10 @@ func main() {
 		}
 	}()
 
-	err = watcher.Add("./")
+	err = watcher.Add("D:\\doc\\bb")
 	if err != nil {
-		log.Fatal("Add failed:", err)
+		log.Println(err)
+		//log.Fatal("Add failed:", err)
 	}
 	<-done
 }

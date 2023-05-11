@@ -1,0 +1,106 @@
+get you off the ground: 离开地面
+
+give you a taste：尝试一下
+
+ranging from simple file processing：从简单的文件处理
+
+to concurrent：为并发
+tendency ：倾向
+
+Be aware of：了解
+
+bias ：偏见
+
+illustrate ：说明
+central ideas: 中心思想
+converts :转换
+
+as the command prompt：作为命令提示符
+
+one-shot experiment：一次实验
+without further processing: 不需要进一步的处理
+
+labeled：打标签
+
+significant：重要的
+corresponding ：相关
+
+organized ：组织
+
+consists of：包含
+
+declaration：声明
+
+followed by： 接下来
+manipulation：（对储存在计算机上的信息的）操作，处理
+
+newline character：换行符
+standalone ：独立运行的
+
+Whatever main does：无论main做什么
+
+call upon functions：调用函数
+the role of：...的作用
+
+import declaration： import 声明
+
+follows the package declaration：跟在包声明
+exactly ：确切的
+
+from accumulating：世代累积
+
+programs evolve：程序演化
+for the most part：大多数情况下
+
+as short as possible：尽可能简洁
+
+since ：因为
+
+in turn：转而
+
+presenting ：呈现
+enclosed in braces：用括号括起来的
+
+take a closer：更进一步
+semicolons ：分号
+
+statements ：语句
+
+except：除了
+
+In effect：事实上
+
+newlines ：换行
+
+following ：v. 跟随；沿行；（时间、顺序）排在……之后
+
+certain：pron. 某些，某几个
+
+newlines following certain tokens：某些标记后面的换行
+
+matters：重要
+
+proper ：正确
+
+opening brace：左大括号
+Declaring ：说明
+
+by fiat：通过命令方式
+
+eliminates ：消除，减少
+
+pointless ：无意义的
+
+debate ：争论
+
+trivia ：琐碎的事情
+
+a variety of：各种各样的
+
+automated ：自动的
+
+source code transformations：源代码转换
+
+infeasible：不可实行的
+
+arbitrary formatting ：随心所欲的格式
